@@ -48,7 +48,7 @@ class SplatRenderer {
   // Blend in linear light instead of the encoded space.
   virtual void setLinearBlending(bool linear) = 0;
   virtual bool linearBlending() const = 0;
-  // Off, frame times stop being multiples of the vsync, which benchmarks need.
+  // Requests a presentation policy; the host can still schedule frames at vsync.
   virtual void setVsync(bool vsync) = 0;
 
   // True when a surface is up: frames can be drawn and worlds uploaded.

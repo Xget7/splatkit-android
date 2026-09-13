@@ -14,9 +14,11 @@ PACKAGES = ("packages/splat-core", "packages/splatkit-engine", "packages/splatki
 FILES = (
     "Package.swift", "LICENSE", "CONTEXT.md", ".clang-format", ".gitignore",
     "scripts/package-ios.sh", "scripts/build-ios.sh", "scripts/sdk_harness.py",
-    "scripts/export-ios-source.py", "scripts/tests/test_sdk_harness.py",
+    "scripts/export-ios-source.py", "scripts/tests", "scripts/benchmark_report.py",
+    "scripts/compare_captures.py", "scripts/requirements-validation.txt",
     ".github/workflows/ios.yml", ".github/workflows/engine.yml", ".github/workflows/core.yml",
-    "docs/BENCHMARKS.md", "docs/benchmarks",
+    "docs/BENCHMARKS.md", "docs/benchmarks", "docs/VALIDATION.md", "docs/adr",
+    "apps/ios-dev",
 )
 FORBIDDEN = {".ply", ".spz", ".glb", ".lodsplat", ".a", ".so", ".dylib", ".pem", ".p12", ".key", ".keystore", ".mobileprovision"}
 SECRET = re.compile(rb"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----|gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{40,}|AKIA[A-Z0-9]{16}")
@@ -40,6 +42,10 @@ def main():
         cwd=ROOT).decode().split("\0")
     selected = {}
     for name in sorted(set(names) - {""}):
+        if name in ("docs/adr/mobile-3d-gs-performative-peak.md", "apps/ios-dev/:-"):
+            continue  # Private working notes and an accidental local file, not SDK sources.
+        if name.startswith("apps/ios-dev/SplatKitDev/Resources/"):
+            continue  # User-owned worlds stay local, including the staged ISS PLY.
         source = ROOT / name
         if not source.exists():  # Deleted source shader, superseded by shaders/Splat.metal.
             continue
@@ -59,6 +65,9 @@ def main():
         target = destination / name
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, target)
+        if target.suffix == ".bat":
+            # Git normalizes this text file; fingerprint the same published bytes.
+            target.write_bytes(target.read_bytes().replace(b"\r\n", b"\n"))
         manifest[name] = hashlib.sha256(target.read_bytes()).hexdigest()
     (destination / "source-manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     print(json.dumps({"directory": str(destination), "files": len(manifest),

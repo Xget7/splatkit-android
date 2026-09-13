@@ -54,7 +54,7 @@ There is no universal 10M/30/60 FPS or lossless guarantee.
 
 ## Contribute
 
-Use the [agent harness](docs/AGENT_HARNESS.md) and [build guide](CONTRIBUTING.md).
+Use the [agent harness](docs/AGENT_HARNESS.md), [validation gates](docs/VALIDATION.md) and [build guide](CONTRIBUTING.md).
 Include device/driver, world, settings and logs with performance reports.
 Next acceptance work: physical Adreno/Mali, lifecycle stress, reference-image comparisons,
 then Vulkan hybrid tiles and React Native integration.
